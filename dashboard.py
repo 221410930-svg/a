@@ -36,40 +36,39 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Session ----------
-if "model" not in st.session_state: st.session_state.model = None
-if "historical" not in st.session_state: st.session_state.historical = None
-if "forecast" not in st.session_state: st.session_state.forecast = None
-if "last_pred" not in st.session_state: st.session_state.last_pred = None
-if "last_update" not in st.session_state: st.session_state.last_update = None
-
-# ---------- Sidebar ----------
-st.sidebar.markdown("## ⚙️ Controls")
-critical_threshold = st.sidebar.slider("Critical Threshold (V)", 0.50, 0.70, 0.60, 0.01)
-horizon_min = st.sidebar.slider("Prediction Horizon (minutes)", 30, 120, 120, 10)
-refresh_seconds = st.sidebar.slider("UI Refresh (seconds)", 2, 10, 5)
-auto_refresh = st.sidebar.checkbox("🔄 Real-time monitoring", value=True)
-
-# Model
-if st.session_state.model is None: 
-    try:
-        st.session_state.model = TimeGPTModel()
-        st.sidebar.success("🤖 TimeGPT connected")
-    except ValueError as e:
-        st.sidebar.error(f"❌ {e}")
-        st.stop()
-
-def add_realtime_point(df: pd.DataFrame) -> pd.DataFrame:
-    if df is None or len(df) == 0: return df
-    df = df.copy()
-    df["ds"] = pd.to_datetime(df["ds"], errors="coerce")
-    last_time = pd.to_datetime(df["ds"].iloc[-1])
-    last_value = float(df["y"].iloc[-1])
-    new_time = last_time + pd.Timedelta(minutes=1)
-    new_value = float(np.clip(last_value + np.random.normal(0, 0.001), 0.45, 0.70))
-    return pd.concat([df, pd.DataFrame({"ds": [new_time], "y": [new_value]})], ignore_index=True)
-
 def main():
+    # ---------- Session State Initialization ----------
+    if "model" not in st.session_state: st.session_state.model = None
+    if "historical" not in st.session_state: st.session_state.historical = None
+    if "forecast" not in st.session_state: st.session_state.forecast = None
+    if "last_pred" not in st.session_state: st.session_state.last_pred = None
+    if "last_update" not in st.session_state: st.session_state.last_update = None
+
+    # ---------- Sidebar ----------
+    st.sidebar.markdown("## ⚙️ Controls")
+    critical_threshold = st.sidebar.slider("Critical Threshold (V)", 0.50, 0.70, 0.60, 0.01)
+    horizon_min = st.sidebar.slider("Prediction Horizon (minutes)", 30, 120, 120, 10)
+    refresh_seconds = st.sidebar.slider("UI Refresh (seconds)", 2, 10, 5)
+    auto_refresh = st.sidebar.checkbox("🔄 Real-time monitoring", value=True)
+
+    # Model
+    if st.session_state.model is None: 
+        try:
+            st.session_state.model = TimeGPTModel()
+            st.sidebar.success("🤖 TimeGPT connected")
+        except ValueError as e:
+            st.sidebar.error(f"❌ {e}")
+            st.stop()
+
+    def add_realtime_point(df: pd.DataFrame) -> pd.DataFrame:
+        if df is None or len(df) == 0: return df
+        df = df.copy()
+        df["ds"] = pd.to_datetime(df["ds"], errors="coerce")
+        last_time = pd.to_datetime(df["ds"].iloc[-1])
+        last_value = float(df["y"].iloc[-1])
+        new_time = last_time + pd.Timedelta(minutes=1)
+        new_value = float(np.clip(last_value + np.random.normal(0, 0.001), 0.45, 0.70))
+        return pd.concat([df, pd.DataFrame({"ds": [new_time], "y": [new_value]})], ignore_index=True)
     # ---------- Data ----------
     if st.session_state.historical is None:
         with st.spinner("📊 Loading data..."):
