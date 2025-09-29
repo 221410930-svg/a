@@ -47,20 +47,23 @@ export NIXTLA_API_KEY=your_api_key_here
 
 1. **Push to GitHub:**
    ```bash
-   git init
    git add .
-   git commit -m "Initial commit"
-   git remote add origin https://github.com/yourusername/your-repo.git
-   git push -u origin main
+   git commit -m "Fixed app.py for Streamlit Cloud deployment"
+   git push
    ```
 
 2. **Deploy on Streamlit Cloud:**
    - Go to [share.streamlit.io](https://share.streamlit.io)
    - Click "New app"
    - Connect your GitHub repository
-   - Set main file path to: `app.py`
-   - Add your `NIXTLA_API_KEY` secret
+   - **Set main file path to: `app.py`** ← This is crucial!
+   - Add your `NIXTLA_API_KEY` secret in the Secrets tab
    - Click "Deploy"
+
+3. **If you get an empty page:**
+   - The new `app.py` is now properly configured for Streamlit Cloud
+   - Make sure you've added the `NIXTLA_API_KEY` secret
+   - The app should now display your dashboard
 
 ### Option 2: Local Development
 
